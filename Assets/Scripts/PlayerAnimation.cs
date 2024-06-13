@@ -27,7 +27,7 @@ public class PlayerAnimation : MonoBehaviour
             lastDirection = DirectionToIndex(_direction);
             if (lastDirection == 1) {
                 lastFlip = 1;
-            } else {
+            } else if (lastDirection == 3) {
                 lastFlip = 0;
             }
         }
