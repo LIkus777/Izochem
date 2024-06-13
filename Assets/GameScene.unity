@@ -334,8 +334,8 @@ GameObject:
   m_Component:
   - component: {fileID: 119968763}
   - component: {fileID: 119968766}
-  - component: {fileID: 119968765}
   - component: {fileID: 119968764}
+  - component: {fileID: 119968767}
   m_Layer: 0
   m_Name: Player Sprite
   m_TagString: Untagged
@@ -379,26 +379,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &119968765
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 119968762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29df4f0783b0fa041a82bbf3cfa03302, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  staticDirections:
-  - Static
-  - Static Right
-  runDirections:
-  - Run Nazad
-  - Run Right
-  - Run Vpered
-  - Run Left
 --- !u!212 &119968766
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -451,6 +431,26 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &119968767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 119968762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be327c32deb8d02449b63dae55be4bb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  staticDirections:
+  - Static
+  - Static Right
+  runDirections:
+  - Run Nazad
+  - Run Right
+  - Run Vpered
+  - Run Left
 --- !u!1 &153512238
 GameObject:
   m_ObjectHideFlags: 0
