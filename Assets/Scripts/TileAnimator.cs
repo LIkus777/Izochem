@@ -42,8 +42,10 @@ public class TileAnimator : MonoBehaviour
             Tilemap newTilemap = newTilemapObj.AddComponent<Tilemap>();
             TilemapRenderer newTilemapRenderer = newTilemapObj.AddComponent<TilemapRenderer>();
             newTilemapRenderer.enabled = true;
+            newTilemapRenderer.mode = tilemapRenderers[tilemap].mode;
             newTilemapRenderer.sortingOrder = tilemapRenderers[tilemap].sortingOrder;
             newTilemapRenderer.sortOrder = tilemapRenderers[tilemap].sortOrder;
+            newTilemapRenderer.material = tilemapRenderers[tilemap].material;
 
             newTilemapObj.transform.SetParent(tilemap.transform);
             newTilemapObj.transform.position = tilemap.transform.position;
