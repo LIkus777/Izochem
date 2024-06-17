@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -12,20 +13,36 @@ public class TileAnimator : MonoBehaviour
     public float verticalOffset = 1f;
 
     public Tilemap[] animatedTilemaps;
+    public List<GameObject> objects;
 
     private Dictionary<Tilemap, HashSet<Vector3Int>> animatedTilesByTilemap = new Dictionary<Tilemap, HashSet<Vector3Int>>();
     private Dictionary<Tilemap, HashSet<Vector3Int>> allTilesByTilemap = new Dictionary<Tilemap, HashSet<Vector3Int>>();
     private Dictionary<Tilemap, TilemapRenderer> tilemapRenderers = new Dictionary<Tilemap, TilemapRenderer>();
     private Dictionary<Tilemap, GameObject> tilemapChilds = new Dictionary<Tilemap, GameObject>();
 
+    private HashSet<GameObject> animatedObjects = new HashSet<GameObject>();
+    private Dictionary<GameObject, Vector3> startPos = new Dictionary<GameObject, Vector3>();
+    private HashSet<GameObject> processing = new HashSet<GameObject>();
+ 
     private void Start()
     {
+        InitObjects();
         CreateTilemaps();
     }
 
     private void Update()
     {
+        AnimateObjects();
         AnimateTiles();
+    }
+
+    private void InitObjects()
+    {
+        foreach (var gameObject in objects)
+        {
+            startPos[gameObject] = gameObject.transform.position;
+            gameObject.SetActive(false);
+        }
     }
 
     private void CreateTilemaps()
@@ -68,6 +85,50 @@ public class TileAnimator : MonoBehaviour
         }
     }
 
+    private void AnimateObjects()
+    {
+        foreach (var gameObject in new List<GameObject>(objects))
+        {
+            if (gameObject == null)
+            {
+                objects.Remove(gameObject);
+                continue;
+            }
+            if (processing.Contains(gameObject))
+            {
+                continue;
+            }
+
+            if (gameObject != null)
+            {
+                if (Vector3.Distance(player.position, gameObject.transform.position) <= triggerDistance)
+                {
+                    if (!animatedObjects.Contains(gameObject))
+                    {
+                        processing.Add(gameObject);
+                        animatedObjects.Add(gameObject);
+                        StartCoroutine(AnimateObject(gameObject, true));
+                    }
+                }
+                else
+                {
+                    if (animatedObjects.Contains(gameObject))
+                    {
+                        processing.Add(gameObject);
+                        animatedObjects.Remove(gameObject);
+                        StartCoroutine(AnimateObject(gameObject, false));
+                    }
+                }
+
+            }
+            else
+            {
+                objects.Remove(gameObject);
+                continue;
+            }
+        }
+    }
+
     private void AnimateTiles()
     {
         foreach (var tilemap in animatedTilemaps)
@@ -98,6 +159,47 @@ public class TileAnimator : MonoBehaviour
                 }
             }
         }
+    }
+
+    private IEnumerator AnimateObject(GameObject gameObject, bool appearing)
+    {
+        Vector3 startPosition = gameObject.transform.position + new Vector3(0, appearing ? -verticalOffset : 0, 0);
+        Vector3 endPosition = gameObject.transform.position + new Vector3(0, appearing ? 0 : -verticalOffset, 0);
+        float timeElapsed = 0;
+        Vector3 startScale = appearing ? new Vector3(minScale, minScale, 1) : Vector3.one;
+        Vector3 endScale = appearing ? Vector3.one : new Vector3(minScale, minScale, 1);
+
+        if (appearing)
+        {
+            gameObject.transform.position = startPosition;
+            gameObject.transform.localScale = startScale;
+            gameObject.SetActive(true);
+        }
+
+        while (timeElapsed < animationDuration)
+        {
+            float t = timeElapsed / animationDuration;
+            Vector3 currentPosition = Vector3.Lerp(startPosition, endPosition, t);
+            Vector3 currentScale = Vector3.Lerp(startScale, endScale, t);
+
+            gameObject.transform.position = currentPosition;
+            gameObject.transform.localScale = currentScale;
+
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (!appearing)
+        {
+            if (Vector3.Distance(player.position, gameObject.transform.position) > triggerDistance)
+            {
+                gameObject.SetActive(false);
+            }
+        }
+
+        gameObject.transform.position = startPos[gameObject];
+
+        processing.Remove(gameObject);
     }
 
     private IEnumerator AnimateTile(Vector3 worldPosition, Vector3Int cellPosition, Tilemap parentTilemap, bool appearing)

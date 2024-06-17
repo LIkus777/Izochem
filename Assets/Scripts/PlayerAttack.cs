@@ -1,48 +1,104 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    private float timeBtwAttack;
-    private float startTimeBtwAttack;
+    private float attackCooldown = 2f;
+    private bool isAttacking = false;
 
     public Transform attackPos;
     public LayerMask enemy;
     public float attackRange;
     public int damage;
     public Animator anim;
-    
-    // Start is called before the first frame update
-    void Start()
+
+    public GameObject bullet;
+
+
+    public PlayerAnimation playerAnimation;
+
+    private void Start()
     {
+        anim = GetComponent<Animator>();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (!playerAnimation.IsAttaking && !playerAnimation.IsThrowing)
+            {
+                playerAnimation.IsThrowing = true;
+                StartCoroutine(playerAnimationViebon());
+            }
+            else
+            {
+                if (!playerAnimation.IsThrowing)
+                {
+                    playerAnimation.IsThrowing = true;
+                    if (!playerAnimation.isMirror)
+                    {
+                    transform.position = new Vector3(transform.position.x + 1.699978f, transform.position.y, transform.position.z);
+                    StartCoroutine(PlayAttackAnimation(playerAnimation.isMirror));
+                    }
+                    else
+                    {
+                    transform.position = new Vector3(transform.position.x - 1.699978f, transform.position.y, transform.position.z);
+                    StartCoroutine(PlayAttackAnimation(playerAnimation.isMirror));
+                    }
+                }
+      
+                
+            }
+        }
+        if (Input.GetMouseButton(0) && !isAttacking)
+        {
+            StartCoroutine(Attack());
+        }
+    }
+    private IEnumerator playerAnimationViebon()
+    {
+        playerAnimation.PlayStoneAnimation(0);
+        yield return new WaitForSeconds(2f);
+        playerAnimation.IsThrowing = false;
         
     }
-
-    // Update is called once per frame
-    void Update()
+    private IEnumerator PlayAttackAnimation(bool isMirror)
     {
-        if (timeBtwAttack <= 0)
-        {
-            if (Input.GetMouseButton(0))
-            {
-                anim.SetTrigger("attack");
-                Collider2D[] enemies = Physics2D.OverlapCircleAll(attackPos.position, attackRange, enemy);
-                for (int i = 0; i < enemies.Length; i++)
-                {
-                    enemies[i].GetComponent<Enemy>().TakeDamage(damage);
-                }
-            }
+        playerAnimation.PlayStoneAnimation(1);
+        bullet.SetActive(true);
 
-            timeBtwAttack = startTimeBtwAttack;
-        }
-        else
+        yield return new WaitForSeconds(0.8f);
+        if(!isMirror)
         {
-            timeBtwAttack -= Time.deltaTime;
+            transform.position = new Vector3(transform.position.x - 1.699978f, transform.position.y, transform.position.z);
         }
+        else{
+            transform.position = new Vector3(transform.position.x + 1.699978f, transform.position.y, transform.position.z);
+        }
+        
+        playerAnimation.IsAttaking = false;
+        bullet.SetActive(false);
+        transform.localEulerAngles = Vector3.zero;
+        playerAnimation.IsThrowing = false;
     }
 
+    private IEnumerator Attack()
+    {
+        isAttacking = true;
+
+        anim.SetTrigger("attack");
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(attackPos.position, attackRange, enemy);
+        if (enemies.Length > 0)
+        {
+            foreach (Collider2D e in enemies)
+            {
+                e.GetComponent<Enemy>().TakeDamage(damage);
+            }
+        }
+        yield return new WaitForSeconds(attackCooldown);
+        isAttacking = false;
+    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

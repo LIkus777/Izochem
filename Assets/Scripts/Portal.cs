@@ -1,29 +1,22 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Portal : MonoBehaviour
 {
-
-    [SerializeField] private Portal toPortal;
-
-    [SerializeField] private GameObject tpEffect;
-    // Start is called before the first frame update
-
+    public GameObject key;
     public static bool tpActive;
+    [SerializeField] private Portal toPortal;
+    
     private void Start()
     {
         tpActive = true;
     }
-
-    // Update is called once per frame
-    private void Update()
-    {
-    }
-
+    
     private void OnTriggerEnter2D(Collider2D other)
     {
         Rigidbody2D rigidbody2D = other.GetComponent<Rigidbody2D>();
-        if (tpActive && rigidbody2D != null)
+        if (tpActive && rigidbody2D != null && key == null)
         {
             tpActive = false;
             float magnitude = rigidbody2D.velocity.magnitude;
@@ -32,6 +25,7 @@ public class Portal : MonoBehaviour
                                 transform.TransformDirection(Vector3.left);
             other.transform.position = toPortal.transform.position;
             rigidbody2D.AddForce(direction * magnitude, ForceMode2D.Impulse);
+            Destroy(gameObject);
         }
         else tpActive = true;
     }
